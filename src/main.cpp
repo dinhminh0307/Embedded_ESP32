@@ -1,44 +1,49 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <WiFiClientSecure.h>
-const char* ssid = "5A1-8";
-const char* password = "sky25a18";
-const int ledPin = 32; // Use your actual LED pin
 
-WiFiClientSecure client;
+const char* ssid = "5A1-8"; // Replace with your WiFi network name
+const char* password = "sky25a18";  // Replace with your WiFi password
+
+const char* serverName = "https://yourserver.com/path"; // Replace with your server's URL
 
 void setup() {
   Serial.begin(115200);
-  pinMode(ledPin, OUTPUT);
+  // Connect to Wi-Fi
   WiFi.begin(ssid, password);
-
-  
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.println("Connecting to WiFi...");
+    Serial.println("Connecting to WiFi..");
   }
   Serial.println("Connected to WiFi");
-  client.setInsecure();
 }
 
 void loop() {
-  if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    http.begin(client, "https://esp-32-web-server-di6l-fn8vc7d6w-dinhminh0307s-projects.vercel.app/"); // Replace with your actual Vercel deployment URL
-    int httpCode = http.GET();
-    if (httpCode == 200) {
+  // Check WiFi connection status
+  if(WiFi.status()== WL_CONNECTED){ 
+    HTTPClient http;   
+    http.begin(serverName); // Specify request destination
+    http.addHeader("Content-Type", "text/plain");  // Specify content-type header
+
+    // Send the request
+    int httpResponseCode = http.GET();  
+
+    if (httpResponseCode>0) {
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
       String payload = http.getString();
-      if (payload.indexOf("\"message\":\"done\"") != -1) {
-        // Signal to blink received
-        // digitalWrite(ledPin, HIGH);
-        // delay(500);
-        // digitalWrite(ledPin, LOW);
-        Serial.println("Receive data");
-      }
-    } else {
-      Serial.println("Error on HTTP request");
+      Serial.println(payload);
     }
-    http.end();
+    else {
+      Serial.print("Error on sending GET: ");
+      Serial.println(httpResponseCode);
+    }
+
+    // Free resources
+    http.end(); 
   }
-  delay(50); // Poll every 10 seconds
+  else {
+    Serial.println("WiFi Disconnected");
+  }
+  // Send a request every 10000 milliseconds
+  delay(10000);  
 }
