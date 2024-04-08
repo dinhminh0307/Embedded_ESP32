@@ -4,7 +4,7 @@
 const char* ssid = "5A1-8"; // Replace with your WiFi network name
 const char* password = "sky25a18";  // Replace with your WiFi password
 
-const char* serverName = "https://yourserver.com/path"; // Replace with your server's URL
+const char* serverName = "https://esp-32-web-server-di6l-hkriymfii-dinhminh0307s-projects.vercel.app/"; // Replace with your server's URL
 
 void setup() {
   Serial.begin(115200);
@@ -31,7 +31,9 @@ void loop() {
       Serial.print("HTTP Response code: ");
       Serial.println(httpResponseCode);
       String payload = http.getString();
-      Serial.println(payload);
+      if (payload.indexOf("\"signal\": 1") > 0) {
+        Serial.println("Signal received. Performing action...");
+      }
     }
     else {
       Serial.print("Error on sending GET: ");
